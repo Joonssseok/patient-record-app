@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>환자 기록 앱</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      margin: 0;
+      padding: 16px;
+      color: #111827;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 850px;
+      margin: 0 auto;
+      background-color: white;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    h1, h2, h3 {
+      margin-top: 0;
+      line-height: 1.3;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      font-size: 18px;
+      margin-bottom: 14px;
+    }
+
+    .section {
+      margin-bottom: 24px;
+      padding: 18px;
+      background-color: #fafafa;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+    }
+
+    .input-group {
+      margin-bottom: 14px;
+    }
+
+    .input-group label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      font-size: 16px;
+      background-color: white;
+    }
+
+    .button-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      min-height: 44px;
+    }
+
+    .primary-btn {
+      background-color: #2563eb;
+      color: white;
+    }
+
+    .secondary-btn {
+      background-color: #e5e7eb;
+      color: #111827;
+    }
+
+    .danger-btn {
+      background-color: #ef4444;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    #warning,
+    #searchWarning {
+      color: red;
+      min-height: 20px;
+      margin-top: 8px;
+      margin-bottom: 0;
+      font-size: 14px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .patient-box {
+      background-color: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 16px;
+      line-height: 1.5;
+      word-break: keep-all;
+    }
+
+    #recordList {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    #recordList li {
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .record-text {
+      flex: 1;
+      white-space: pre-line;
+      line-height: 1.6;
+      word-break: break-word;
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 12px;
+      }
+
+      .container {
+        padding: 16px;
+        border-radius: 12px;
+      }
+
+      .section {
+        padding: 14px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      h3 {
+        font-size: 17px;
+      }
+
+      .button-row {
+        flex-direction: column;
+      }
+
+      .button-row button {
+        width: 100%;
+      }
+
+      #recordList li {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .danger-btn {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 10px;
+      }
+
+      .container {
+        padding: 14px;
+      }
+
+      .input-group input {
+        padding: 11px 12px;
+        font-size: 16px;
+      }
+
+      .record-text {
+        font-size: 13px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>환자 기록 앱</h1>
+
+    <div class="section">
+      <h2>기록 입력</h2>
+
+      <div class="input-group">
+        <label for="patientNumberInput">환자번호</label>
+        <input type="text" id="patientNumberInput" placeholder="예: 1">
+      </div>
+
+      <div class="input-group">
+        <label for="patientNameInput">이름</label>
+        <input type="text" id="patientNameInput" placeholder="예: 홍길동">
+      </div>
+
+      <div class="input-group">
+        <label for="partInput">통증부위</label>
+        <input type="text" id="partInput" placeholder="예: 목, 어깨, 허리" onkeydown="handleAddEnter(event)">
+      </div>
+
+      <div class="input-group">
+        <label for="symptomInput">증상</label>
+        <input type="text" id="symptomInput" placeholder="예: 뻐근함, 저림, 찌릿함" onkeydown="handleAddEnter(event)">
+      </div>
+
+      <div class="input-group">
+        <label for="painInput">통증점수</label>
+        <input type="number" id="painInput" placeholder="0~10" onkeydown="handleAddEnter(event)">
+      </div>
+
+      <div class="button-row">
+        <button class="primary-btn" onclick="addRecord()">기록 추가</button>
+      </div>
+
+      <p id="warning"></p>
+    </div>
+
+    <div class="section">
+      <h2>환자번호 검색</h2>
+
+      <div class="input-group">
+        <label for="searchPatientNumber">환자번호</label>
+        <input type="text" id="searchPatientNumber" placeholder="예: 1" onkeydown="handleSearchEnter(event)">
+      </div>
+
+      <div class="button-row">
+        <button class="primary-btn" onclick="searchPatient()">검색</button>
+        <button class="secondary-btn" onclick="goHome()">뒤로가기</button>
+      </div>
+
+      <p id="searchWarning"></p>
+    </div>
+
+    <div id="resultSection" class="hidden">
+      <div id="patientInfoBox" class="patient-box"></div>
+      <h3>검색된 환자 기록</h3>
+      <ul id="recordList"></ul>
+    </div>
+  </div>
+
+  <script>
+
+    const SUPABASE_URL = "https://jxlbilfzarapwohvaawp.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_bnoJt4yk6miOcLXwpYI8Uw_YpV2vi8T";
+
+    let records = JSON.parse(localStorage.getItem("patientRecords")) || [];
+    let currentPatientNumber = null;
+
+    function saveRecords() {
+      localStorage.setItem("patientRecords", JSON.stringify(records));
+    }
+
+    function handleAddEnter(event) {
+      if (event.key === "Enter") {
+        addRecord();
+      }
+    }
+
+    function handleSearchEnter(event) {
+      if (event.key === "Enter") {
+        searchPatient();
+      }
+    }
+
+    function goHome() {
+      currentPatientNumber = null;
+      document.getElementById("searchPatientNumber").value = "";
+      document.getElementById("searchWarning").textContent = "";
+      document.getElementById("resultSection").classList.add("hidden");
+      document.getElementById("recordList").innerHTML = "";
+      document.getElementById("patientInfoBox").textContent = "";
+    }
+
+    function addRecord() {
+      let patientNumber = document.getElementById("patientNumberInput").value.trim();
+      let patientName = document.getElementById("patientNameInput").value.trim();
+      let part = document.getElementById("partInput").value.trim();
+      let symptom = document.getElementById("symptomInput").value.trim();
+      let pain = document.getElementById("painInput").value.trim();
+
+      if (
+        patientNumber === "" ||
+        patientName === "" ||
+        part === "" ||
+        symptom === "" ||
+        pain === ""
+      ) {
+        document.getElementById("warning").textContent = "모든 칸을 입력해줘!";
+        return;
+      }
+
+      let existingRecord = records.find(function(record) {
+        return record.patientNumber === patientNumber;
+      });
+
+      if (existingRecord && existingRecord.patientName !== patientName) {
+        document.getElementById("warning").textContent = "같은 환자번호에 다른 이름을 넣을 수 없어!";
+        return;
+      }
+
+      document.getElementById("warning").textContent = "";
+
+      let today = new Date().toLocaleString();
+
+      let newRecord = {
+        id: Date.now() + Math.random(),
+        patientNumber: patientNumber,
+        patientName: patientName,
+        part: part,
+        symptom: symptom,
+        pain: pain,
+        date: today
+      };
+
+      records.push(newRecord);
+      saveRecords();
+
+      if (currentPatientNumber === patientNumber) {
+        renderRecords();
+      }
+
+      document.getElementById("partInput").value = "";
+      document.getElementById("symptomInput").value = "";
+      document.getElementById("painInput").value = "";
+      document.getElementById("partInput").focus();
+    }
+
+    function searchPatient() {
+      let searchNumber = document.getElementById("searchPatientNumber").value.trim();
+
+      if (searchNumber === "") {
+        document.getElementById("searchWarning").textContent = "환자번호를 입력해줘!";
+        return;
+      }
+
+      let filteredRecords = records.filter(function(record) {
+        return record.patientNumber === searchNumber;
+      });
+
+      if (filteredRecords.length === 0) {
+        document.getElementById("searchWarning").textContent = "해당 환자번호 기록이 없어.";
+        document.getElementById("resultSection").classList.add("hidden");
+        document.getElementById("recordList").innerHTML = "";
+        document.getElementById("patientInfoBox").textContent = "";
+        return;
+      }
+
+      currentPatientNumber = searchNumber;
+      document.getElementById("searchWarning").textContent = "";
+
+      let patientName = filteredRecords[0].patientName;
+      document.getElementById("patientInfoBox").textContent =
+        "환자번호: " + searchNumber + " / 이름: " + patientName;
+
+      document.getElementById("resultSection").classList.remove("hidden");
+      renderRecords();
+    }
+
+    function renderRecords() {
+      let recordList = document.getElementById("recordList");
+      recordList.innerHTML = "";
+
+      if (currentPatientNumber === null) {
+        return;
+      }
+
+      let filteredRecords = records.filter(function(record) {
+        return record.patientNumber === currentPatientNumber;
+      });
+
+      filteredRecords.forEach(function(record) {
+        let li = document.createElement("li");
+
+        let textDiv = document.createElement("div");
+        textDiv.className = "record-text";
+        textDiv.textContent =
+          "환자번호: " + record.patientNumber + "\n" +
+          "이름: " + record.patientName + "\n" +
+          "통증부위: " + record.part + "\n" +
+          "증상: " + record.symptom + "\n" +
+          "통증점수: " + record.pain + "\n" +
+          "날짜: " + record.date;
+
+        let deleteButton = document.createElement("button");
+        deleteButton.textContent = "삭제";
+        deleteButton.className = "danger-btn";
+
+        deleteButton.onclick = function() {
+          let realIndex = records.findIndex(function(item) {
+            return item.id === record.id;
+          });
+
+          if (realIndex !== -1) {
+            records.splice(realIndex, 1);
+            saveRecords();
+
+            let stillExists = records.some(function(item) {
+              return item.patientNumber === currentPatientNumber;
+            });
+
+            if (stillExists) {
+              renderRecords();
+            } else {
+              goHome();
+            }
+          }
+        };
+
+        li.appendChild(textDiv);
+        li.appendChild(deleteButton);
+        recordList.appendChild(li);
+      });
+    }
+
+    goHome();
+  </script>
+</body>
+</html>
